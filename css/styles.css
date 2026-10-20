@@ -1,5 +1,8 @@
-/*recordar modificar stilosss*/
+/*recordar modificar stilosss Tailwind*/
 /* Estilos generales */
+
+
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -324,4 +327,22 @@ body {
         align-items: flex-start;
         flex-direction: column;
     }
+}
+
+
+/* version v0.8.0 - Botón eliminar cuenta */
+
+/* Botón de acción peligrosa */
+.btn-danger {
+    background-color: #dc2626;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-danger:active {
+    background-color: #991b1b;
 }
