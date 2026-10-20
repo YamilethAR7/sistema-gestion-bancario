@@ -1,16 +1,11 @@
+## Versión actualv0.6.0 
 
-## Versión actual v0.4.0 
-Modelo  del banco y reglas del dominio bancario lo que si y lo que no.
+Registro, autenticación y sesiones del usuario.
 
-## Funciones agregadas
-En esta versión se creó Banco.js en models dentro de js, para administrar
-usuarios, cuentas y movimientos.
+1.En esta versión se agregaron formularios para registrar usuarios e iniciar sesión.
 
-Se utilizaron los métodos agregarUsuario(),
-buscarUsuarioPorId(), agregarCuenta(),
-buscarCuentaPorId(), buscarCuentaPorNumero(),
-obtenerCuentasDeUsuario(), registrarMovimiento(),
-realizarDeposito() y obtenerMovimientosDeCuenta().
+2.También se creó AuthService.js* para administrar las
+3.sesiones mediante LocalStorage*.
 
-También se agregaron validaciones para evitar
-cuentas duplicadas y depósitos con montos inválidos.
+4.se utilizó SweetAlert2* para mostrar mensajes de registro, errores y confirmación al cerrar sesión.
+5.Se agregó dashboard.html* y DashboardUI.js* para mostrar al usuario que incio sesion
