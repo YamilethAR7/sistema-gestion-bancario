@@ -1,11 +1,16 @@
-## Versión actualv0.6.0 
 
-Registro, autenticación y sesiones del usuario.
+## Versión actual v0.7.0 - BancoService y dashboard bancario.
+## Funcionalidades agregadas
 
-1.En esta versión se agregaron formularios para registrar usuarios e iniciar sesión.
+En esta versión se creó BancoService.js*  para recuperar
+y administrar la info bancaria.
 
-2.También se creó AuthService.js* para administrar las
-3.sesiones mediante LocalStorage*.
+la pantalla ahora muestra:
+- Nombre del usuario.
+- Saldo total.
+- Cantidad de cuentas.
+- Cantidad de movimientos.
+- Número de cuenta principal.
+- Tipo de cuenta y saldo disponible.
 
-4.se utilizó SweetAlert2* para mostrar mensajes de registro, errores y confirmación al cerrar sesión.
-5.Se agregó dashboard.html* y DashboardUI.js* para mostrar al usuario que incio sesion
+Se utilizaron métodos de arrays y manipulación del DOM para mostrar la información guardada en LocalStorage*

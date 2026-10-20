@@ -1,0 +1,150 @@
+// version v0.7.0
+// servicio para admin la info bancaria
+
+import { Banco } from "../models/Banco.js";
+import { Usuario } from "../models/Usuario.js";
+import { Cuenta } from "../models/Cuenta.js";
+import { Movimiento } from "../models/Movimiento.js";
+
+import {
+    STORAGE_KEYS,
+    storageService
+} from "./StorageService.js";
+
+class BancoService {
+
+    constructor() {
+        this._banco = null;
+    }
+
+    // recuprar info desde LocalStorage
+    cargarBanco() {
+        const usuariosGuardados = storageService.obtener(
+            STORAGE_KEYS.USUARIOS, []
+        );
+
+        const cuentasGuardadas = storageService.obtener(
+            STORAGE_KEYS.CUENTAS, []
+        );
+
+        const movimientosGuardados = storageService.obtener(
+            STORAGE_KEYS.MOVIMIENTOS, []
+        );
+
+        // reconstruir las clases
+        const usuarios = usuariosGuardados.map(
+            (usuario) => new Usuario(usuario)
+        );
+
+        const cuentas = cuentasGuardadas.map(
+            (cuenta) => new Cuenta(cuenta)
+        );
+
+        const movimientos = movimientosGuardados.map(
+            (movimiento) => new Movimiento(movimiento)
+        );
+
+        this._banco = new Banco({
+            usuarios,
+            cuentas,
+            movimientos
+        });
+
+        return this._banco;
+    }
+
+    // obtener la instancia del banco
+    obtenerInstanciaBanco() {
+        if (!this._banco) {
+            return this.cargarBanco();
+        }
+
+        return this._banco;
+    }
+
+    // recargamos datos del banco
+    recargarBanco() {
+        this._banco = null;
+        return this.cargarBanco();
+    }
+
+    // Guardar info
+    guardarBanco() {
+        const banco = this.obtenerInstanciaBanco();
+
+        storageService.guardar(
+            STORAGE_KEYS.USUARIOS, banco.usuarios
+        );
+
+        storageService.guardar(
+            STORAGE_KEYS.CUENTAS, banco.cuentas
+        );
+
+        storageService.guardar(
+            STORAGE_KEYS.MOVIMIENTOS, banco.movimientos
+        );
+
+        return true;
+    }
+
+    // obt info de un usuario
+    obtenerDatosUsuario(usuarioId) {
+        const banco = this.obtenerInstanciaBanco();
+
+        const usuario = banco.buscarUsuarioPorId(usuarioId);
+
+        if (!usuario) {
+            throw new Error("El usuario no existe.");
+        }
+
+        const cuentas = banco.obtenerCuentasDeUsuario(usuarioId);
+
+        // obt movimientos de todas sus cuentas
+        const movimientosSinFiltrar = cuentas.flatMap(
+            (cuenta) =>
+                banco.obtenerMovimientosDeCuenta(cuenta.id)
+        );
+
+        // evitar movimientos duplicados
+        const movimientos = movimientosSinFiltrar.filter(
+            (movimiento, index, array) =>
+                index === array.findIndex(
+                    (item) => item.id === movimiento.id
+                )
+        );
+
+        return {
+            usuario,
+            cuentas,
+            movimientos
+        };
+    }
+
+    // obt resumen para el Dashboard
+    obtenerResumenUsuario(usuarioId) {
+        const {
+            usuario,
+            cuentas,
+            movimientos
+        } = this.obtenerDatosUsuario(usuarioId);
+
+        // contante para sumar los saldos
+        const saldoTotal = cuentas.reduce(
+            (acumulado, cuenta) =>
+                acumulado + Number(cuenta.saldo),
+            0
+        );
+
+        return {
+            usuario,
+            cuentas,
+            movimientos,
+            saldoTotal,
+            totalCuentas: cuentas.length,
+            totalMovimientos: movimientos.length
+        };
+    }
+}
+
+// exportamis instancia del servicio
+export const bancoService = new BancoService();
