@@ -1,8 +1,7 @@
-// Módulo 4 - Sistema de Gestión Bancaria
-// Versión v0.1.0 a 5/ actual versión v0.3.0
-// xconsola que muestra la ui de la version que voy elabo
+// versión v0.5.0 - Sistema de Gestión Bancaria
 
-//primero imports como JMa
+
+// Importar utilidades
 import {
     validarCampoObligatorio,
     validarMonto
@@ -16,16 +15,25 @@ import {
     formatAccountNumber
 } from "./utils/formateador.js";
 
-//imports models
+// Importar modelos
 import { Usuario } from "./models/Usuario.js";
 import { Cuenta } from "./models/Cuenta.js";
 import { Movimiento } from "./models/Movimiento.js";
-import{Banco } from"./models/Banco.js";
+import { Banco } from "./models/Banco.js";
 
-//verificamos con console.log y comprobamos
-console.log("Sistema de Gestión Bancaria - v0.4.0");
 
-console.log("Campo obligatorio:", validarCampoObligatorio("Banco Digital")
+import {
+    STORAGE_KEYS,
+    storageService
+} from "./services/StorageService.js";
+
+
+// Comprobar utilidades
+console.log("Sistema de Gestión Bancaria - v0.5.0");
+
+console.log(
+    "Campo obligatorio:",
+    validarCampoObligatorio("Banco Digital")
 );
 
 
@@ -37,97 +45,150 @@ console.log("Monto formateado:", formatCurrency(1500));
 
 console.log("Fecha formateada:", formatDate(new Date()));
 
-console.log("Número de cuenta:", formatAccountNumber("123456789012"));
 
-//crear banko
-const bancoDemo = new Banco();
-
-
-// Crear usuario de ejemplo
-const usuarioDemo = new Usuario({
-    nombre: "yamileth Acevedo",
-    email: "yamii@gmail.com",
-    telefono: "2747412397",
-    password: "122347"
-});
-
-//registrar usuario en el banco
-bancoDemo.agregarUsuario(usuarioDemo);
-//comprobamos banco
 console.log(
-    "Usuarios registrados:",
+    "Número de cuenta:",
+    formatAccountNumber("123456789012")
+);
+
+// Guardar el estado del banco
+function guardarBanco(banco) {
+
+    // Guardar usuarios
+    storageService.guardar(
+        STORAGE_KEYS.USUARIOS,
+        banco.usuarios
+    );
+
+    // Guardar cuentas
+    storageService.guardar(
+        STORAGE_KEYS.CUENTAS,
+        banco.cuentas
+    );
+
+    // Guardar movimientos
+    storageService.guardar(
+        STORAGE_KEYS.MOVIMIENTOS,
+        banco.movimientos
+    );
+}
+
+// Recuperar el banco desde LocalStorage
+function cargarBanco() {
+
+    const usuariosGuardados = storageService.obtener(
+        STORAGE_KEYS.USUARIOS,
+        []
+    );
+
+    const cuentasGuardadas = storageService.obtener(
+        STORAGE_KEYS.CUENTAS,
+        []
+    );
+
+    const movimientosGuardados = storageService.obtener(
+        STORAGE_KEYS.MOVIMIENTOS,
+        []
+    );
+
+    // reconstruir instancias de Usuario
+    const usuarios = usuariosGuardados.map(
+        (usuario) => new Usuario(usuario)
+    );
+
+    // reconstruir instancias de Cuenta
+    const cuentas = cuentasGuardadas.map(
+        (cuenta) => new Cuenta(cuenta)
+    );
+
+    // Reconstruir instancias de Movimiento
+    const movimientos = movimientosGuardados.map(
+        (movimiento) => new Movimiento(movimiento)
+    );
+
+    // Crear banco con los datos recuperados
+    return new Banco({
+        usuarios,
+        cuentas,
+        movimientos
+    });
+}
+
+// Cargar el bank
+const bancoDemo = cargarBanco();
+
+// Crear datos de ejemplo solamente si no existen usuarios
+if (bancoDemo.usuarios.length === 0) {
+
+    // Crear usuario de demostración
+    const usuarioDemo = new Usuario({
+        nombre: "Juan Suarez",
+        email: "juan@correo.com",
+        telefono: "5512345678",
+        password: "123456"
+    });
+
+    bancoDemo.agregarUsuario(usuarioDemo);
+
+    // Crear cuenta
+    const cuentaDemo = new Cuenta({
+        numeroCuenta: "123456789012",
+        usuarioId: usuarioDemo.id
+    });
+
+    bancoDemo.agregarCuenta(cuentaDemo);
+
+    // Realizar depósito inicial
+    bancoDemo.realizarDeposito({
+        cuentaId: cuentaDemo.id,
+        monto: 5000,
+        descripcion: "Depósito inicial"
+    });
+
+    // Guardar datos en LocalStorage
+    guardarBanco(bancoDemo);
+}
+
+// Mostrar información recuperada
+console.log("Banco recuperado:", bancoDemo);
+
+console.log(
+    "Usuarios almacenados:",
     bancoDemo.usuarios
 );
 
-console.log("Usuario:", usuarioDemo);
-// Crear cuenta bank
-const cuentaDemo = new Cuenta({
-    numeroCuenta: "123456789012",
-    usuarioId: usuarioDemo.id
-});
 
-//registro en cuenta banco
-bancoDemo.agregarCuenta(cuentaDemo);
 console.log(
-    "Cuentas registradas:",
+    "Cuentas almacenadas:",
     bancoDemo.cuentas
 );
 
 
-// Realizar deposito desde banco
-const depositoDemo = bancoDemo.realizarDeposito({
-    cuentaId: cuentaDemo.id,
-    monto: 5000,
-    descripcion: "Depósito inicial"
-});
 
-// Mostrar saldo
 console.log(
-    "Saldo actual:",
-    formatCurrency(cuentaDemo.saldo)
-);
-
-// muestra movimiento generado
-console.log(
-    "Movimiento generado:",
-    depositoDemo
-);
-
-// muestra movimientos registrados
-console.log(
-    "Movimientos registrados:",
+    "Movimientos almacenados:",
     bancoDemo.movimientos
 );
 
-// Buscar usuario por id
-const usuarioEncontrado = bancoDemo.buscarUsuarioPorId(
-    usuarioDemo.id
-);
+// Obtener primera cuenta
+const cuentaPrincipal = bancoDemo.cuentas[0] || null;
 
-console.log(
-    "El usuario ha sido encontrado:",
-    usuarioEncontrado
-);
+if (cuentaPrincipal) {
 
-// Obtener cuentas del usuario
-const cuentasUsuario = bancoDemo.obtenerCuentasDeUsuario(
-    usuarioDemo.id
-);
-
-console.log(
-    "Cuentas del usuario:",
-    cuentasUsuario
-);
-
-// Probar un deposito invalido por comprobacion
-try {
-    bancoDemo.realizarDeposito({
-        cuentaId: cuentaDemo.id,
-        monto: -500
-    });
-} catch (error) {
     console.log(
-        "Error :",
-        error.message
+        "Saldo persistido:",
+        formatCurrency(cuentaPrincipal.saldo)
+    );
+
+    // Comprobar que recuperamos la clase Cuenta
+    console.log(
+        "¿La cuenta sigue siendo instancia de Cuenta?",
+        cuentaPrincipal instanceof Cuenta
+    );
+
+    // Comprobar que conserva sus métodos
+    console.log(
+        "Método depositar:",
+        typeof cuentaPrincipal.depositar
     );
 }
