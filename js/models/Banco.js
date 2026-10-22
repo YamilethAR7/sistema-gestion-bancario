@@ -1,5 +1,4 @@
-
-// version v0.9.0 - Banco
+// version v0.10.0 - Banco
 // admin usuarios, cuentas y movimientos
 
 import { Movimiento } from "./Movimiento.js";

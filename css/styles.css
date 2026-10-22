@@ -11,9 +11,9 @@
 
 body {
     min-height: 100vh;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #f4f6f8;
-    color: #1f2937;
+    font-family: fantasy, Helvetica, sans-serif;
+    background-color: #00366d;
+    color: #4b4444;
 }
 
 /* Pantalla de autenticación */
@@ -24,8 +24,9 @@ body {
 
 /* Encabezado */
 .auth-header {
+    color: #d1d5db;
     max-width: 900px;
-    margin: 0 auto 32px;
+    margin: 0 auto 47px;
     text-align: center;
 }
 
@@ -35,13 +36,14 @@ body {
 }
 
 .auth-header p {
+    font-family: Arial, Helvetica, sans-serif;
     margin-bottom: 8px;
-    color: #6b7280;
+    color: #a6c7c7;
 }
 
 .auth-header span {
     font-size: 0.9rem;
-    color: #6b7280;
+    color: #82878f;
 }
 
 /* Contenedor de formularios */
@@ -109,7 +111,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #1d4ed8;
+    background-color: #07216b;
 }
 
 /* Diseño para celulares */
@@ -190,7 +192,7 @@ body {
 /* Botón secundario */
 .btn-secondary {
     background-color: #e5e7eb;
-    color: #1f2937;
+    color: #2c3848;
 }
 
 /* Navegación */
