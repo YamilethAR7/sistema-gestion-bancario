@@ -1,16 +1,17 @@
+## version actual la v0.8.0 - Gestión de cuenta, perfil y seguridad.
 
-## Versión actual v0.7.0 - BancoService y dashboard bancario.
 ## Funcionalidades agregadas
+- Consultar información personal y bancaria.
+- Mostrar saldo y fecha de apertura.
+- Actualizar nombre, correo y teléfono.
+- Validar correos duplicados.
+- Cambiar contraseña.
+- Confirmar eliminación de cuenta.
+- Impedir eliminar usuarios con saldo disponible.
+- Guardar cambios mediante LocalStorage.
+- Proteger la página mi cuenta mediante sesión.
 
-En esta versión se creó BancoService.js*  para recuperar
-y administrar la info bancaria.
-
-la pantalla ahora muestra:
-- Nombre del usuario.
-- Saldo total.
-- Cantidad de cuentas.
-- Cantidad de movimientos.
-- Número de cuenta principal.
-- Tipo de cuenta y saldo disponible.
-
-Se utilizaron métodos de arrays y manipulación del DOM para mostrar la información guardada en LocalStorage*
+## Nuevos archivos
+- creamos cuenta.html*: pag de administración de cuenta
+- CuentaUI.js*: interfaz y formularios de mi cuenta
+y se agregaron nuevos métodos a BancoService.js.

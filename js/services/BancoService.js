@@ -1,4 +1,4 @@
-// version v0.7.0
+// version v0.8.0
 // servicio para admin la info bancaria
 
 import { Banco } from "../models/Banco.js";
@@ -144,7 +144,176 @@ class BancoService {
             totalMovimientos: movimientos.length
         };
     }
+
+    // Actualizar info personal vers8
+    actualizarUsuario(usuarioId, { nombre, email, telefono }) {
+        const usuarios = storageService.obtener(
+            STORAGE_KEYS.USUARIOS, []
+        );
+
+        const usuario = usuarios.find(
+            (item) => item.id === usuarioId
+        );
+
+        if (!usuario) {
+            throw new Error("El usuario no existe.");
+        }
+
+        const emailNormalizado = String(email).trim().toLowerCase();
+
+        const emailDuplicado = usuarios.some(
+            (item) =>
+                item.email.toLowerCase() === emailNormalizado &&
+                item.id !== usuarioId
+        );
+
+        if (emailDuplicado) {
+            throw new Error("Ya existe un usuario con este correo.");
+        }
+
+        const usuariosActualizados = usuarios.map(
+            (item) =>
+                item.id === usuarioId
+                    ? {
+                        ...item,
+                        nombre: nombre.trim(),
+                        email: emailNormalizado,
+                        telefono: telefono.trim()
+                    }
+                    : item
+        );
+
+        storageService.guardar(
+            STORAGE_KEYS.USUARIOS,
+            usuariosActualizados
+        );
+
+        this.recargarBanco();
+
+        return usuariosActualizados.find(
+            (item) => item.id === usuarioId
+        ) || null;
+    }
+
+    // Cambiar contraseña
+    cambiarPassword(usuarioId, passwordActual, passwordNueva) {
+        const usuarios = storageService.obtener(
+            STORAGE_KEYS.USUARIOS, []
+        );
+
+        const usuario = usuarios.find(
+            (item) => item.id === usuarioId
+        );
+
+        if (!usuario) {
+            throw new Error("El usuario no existe.");
+        }
+
+        if (usuario.password !== passwordActual) {
+            throw new Error("La contraseña actual no es correcta.");
+        }
+
+        if (passwordNueva === passwordActual) {
+            throw new Error("La nueva contraseña debe ser diferente.");
+        }
+
+        if (passwordNueva.length < 6) {
+            throw new Error(
+                "La nueva contraseña debe tener al menos 6 caracteres."
+            );
+        }
+
+        const usuariosActualizados = usuarios.map(
+            (item) =>
+                item.id === usuarioId
+                    ? { ...item, password: passwordNueva }
+                    : item
+        );
+
+        storageService.guardar(
+            STORAGE_KEYS.USUARIOS,
+            usuariosActualizados
+        );
+
+        this.recargarBanco();
+
+        return true;
+    }
+
+    // Eliminar usuario y sus datos relacionados
+    eliminarUsuario(usuarioId) {
+        const usuarios = storageService.obtener(
+            STORAGE_KEYS.USUARIOS, []
+        );
+
+        const cuentas = storageService.obtener(
+            STORAGE_KEYS.CUENTAS, []
+        );
+
+        const movimientos = storageService.obtener(
+            STORAGE_KEYS.MOVIMIENTOS, []
+        );
+
+        const usuario = usuarios.find(
+            (item) => item.id === usuarioId
+        );
+
+        if (!usuario) {
+            throw new Error("El usuario no existe.");
+        }
+
+        const cuentasUsuario = cuentas.filter(
+            (cuenta) => cuenta.usuarioId === usuarioId
+        );
+
+        const tieneSaldo = cuentasUsuario.some(
+            (cuenta) => Number(cuenta.saldo) > 0
+        );
+
+        if (tieneSaldo) {
+            throw new Error(
+                "No puedes eliminar tu cuenta mientras tengas saldo disponible."
+            );
+        }
+
+        const cuentasUsuarioIds = cuentasUsuario.map(
+            (cuenta) => cuenta.id
+        );
+
+        const usuariosFiltrados = usuarios.filter(
+            (item) => item.id !== usuarioId
+        );
+
+        const cuentasFiltradas = cuentas.filter(
+            (cuenta) => cuenta.usuarioId !== usuarioId
+        );
+
+        const movimientosFiltrados = movimientos.filter(
+            (movimiento) =>
+                !cuentasUsuarioIds.includes(movimiento.cuentaOrigen) &&
+                !cuentasUsuarioIds.includes(movimiento.cuentaDestino)
+        );
+
+        storageService.guardar(
+            STORAGE_KEYS.USUARIOS,
+            usuariosFiltrados
+        );
+
+        storageService.guardar(
+            STORAGE_KEYS.CUENTAS,
+            cuentasFiltradas
+        );
+
+        storageService.guardar(
+            STORAGE_KEYS.MOVIMIENTOS,
+            movimientosFiltrados
+        );
+
+        this.recargarBanco();
+
+        return true;
+    }
 }
 
-// exportamis instancia del servicio
+// exportamos instancia del servicio
 export const bancoService = new BancoService();
