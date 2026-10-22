@@ -145,6 +145,66 @@ class BancoService {
         };
     }
 
+//vers9
+// realizar depósito
+realizarDeposito({
+    cuentaId,
+    monto,
+    descripcion = ""
+}) {
+    const banco = this.obtenerInstanciaBanco();
+
+    const movimiento = banco.realizarDeposito({
+        cuentaId,
+        monto,
+        descripcion
+    });
+
+    // Guardar saldo y movimiento
+    this.guardarBanco();
+
+    return movimiento;
+}
+
+// v9 - realiza transferencia
+realizarTransferencia({
+    cuentaOrigenId,
+    numeroCuentaDestino,
+    monto,
+    descripcion = ""
+}) {
+    const banco = this.obtenerInstanciaBanco();
+
+    // eliminar espacios del número de cuenta
+    const numeroDestino = String(numeroCuentaDestino)
+        .replace(/\s/g, "")
+        .trim();
+
+    // busca cuenta destino
+    const cuentaDestino = banco.buscarCuentaPorNumero(
+        numeroDestino
+    );
+
+    if (!cuentaDestino) {
+        throw new Error("La cuenta destino no existe.");
+    }
+
+    // realizamos transferencia
+    const resultado = banco.realizarTransferencia({
+        cuentaOrigenId,
+        cuentaDestinoId: cuentaDestino.id,
+        monto,
+        descripcion
+    });
+
+    // Guardar nuevos saldos y movimientos
+    this.guardarBanco();
+
+    return resultado;
+}
+
+
+
     // Actualizar info personal vers8
     actualizarUsuario(usuarioId, { nombre, email, telefono }) {
         const usuarios = storageService.obtener(
