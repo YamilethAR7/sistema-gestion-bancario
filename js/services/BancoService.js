@@ -1,4 +1,5 @@
-// version v0.8.0
+
+// version v0.10.0
 // servicio para admin la info bancaria
 
 import { Banco } from "../models/Banco.js";
@@ -99,18 +100,35 @@ class BancoService {
 
         const cuentas = banco.obtenerCuentasDeUsuario(usuarioId);
 
-        // obt movimientos de todas sus cuentas
-        const movimientosSinFiltrar = cuentas.flatMap(
-            (cuenta) =>
-                banco.obtenerMovimientosDeCuenta(cuenta.id)
+        // obt ids de sus cuentas
+        const cuentasIds = cuentas.map(
+            (cuenta) => cuenta.id
         );
 
-        // evitar movimientos duplicados
-        const movimientos = movimientosSinFiltrar.filter(
-            (movimiento, index, array) =>
-                index === array.findIndex(
-                    (item) => item.id === movimiento.id
-                )
+        // obt movimientos del usuario
+        const movimientos = banco.movimientos.filter(
+            (movimiento) => {
+
+                if (movimiento.tipo === "DEPOSITO") {
+                    return cuentasIds.includes(
+                        movimiento.cuentaOrigen
+                    );
+                }
+
+                if (movimiento.tipo === "TRANSFERENCIA_ENVIADA") {
+                    return cuentasIds.includes(
+                        movimiento.cuentaOrigen
+                    );
+                }
+
+                if (movimiento.tipo === "TRANSFERENCIA_RECIBIDA") {
+                    return cuentasIds.includes(
+                        movimiento.cuentaDestino
+                    );
+                }
+
+                return false;
+            }
         );
 
         return {
@@ -145,65 +163,111 @@ class BancoService {
         };
     }
 
-//vers9
-// realizar depósito
-realizarDeposito({
-    cuentaId,
-    monto,
-    descripcion = ""
-}) {
-    const banco = this.obtenerInstanciaBanco();
+    // vers10
+    // obt movimientos y filtrarlos
+    obtenerMovimientosUsuario(usuarioId, tipo = "TODOS") {
+        const { movimientos } = this.obtenerDatosUsuario(usuarioId);
 
-    const movimiento = banco.realizarDeposito({
-        cuentaId,
-        monto,
-        descripcion
-    });
+        let resultado = [...movimientos];
 
-    // Guardar saldo y movimiento
-    this.guardarBanco();
+        // filtrar por tipo
+        if (tipo !== "TODOS") {
+            resultado = resultado.filter(
+                (movimiento) => movimiento.tipo === tipo
+            );
+        }
 
-    return movimiento;
-}
+        // ordenar por fecha
+        resultado.sort(
+            (a, b) => new Date(b.fecha) - new Date(a.fecha)
+        );
 
-// v9 - realiza transferencia
-realizarTransferencia({
-    cuentaOrigenId,
-    numeroCuentaDestino,
-    monto,
-    descripcion = ""
-}) {
-    const banco = this.obtenerInstanciaBanco();
-
-    // eliminar espacios del número de cuenta
-    const numeroDestino = String(numeroCuentaDestino)
-        .replace(/\s/g, "")
-        .trim();
-
-    // busca cuenta destino
-    const cuentaDestino = banco.buscarCuentaPorNumero(
-        numeroDestino
-    );
-
-    if (!cuentaDestino) {
-        throw new Error("La cuenta destino no existe.");
+        return resultado;
     }
 
-    // realizamos transferencia
-    const resultado = banco.realizarTransferencia({
-        cuentaOrigenId,
-        cuentaDestinoId: cuentaDestino.id,
+    // resumen de movimientos
+    obtenerResumenMovimientos(usuarioId) {
+        const movimientos = this.obtenerMovimientosUsuario(usuarioId);
+
+        const depositos = movimientos.filter(
+            (movimiento) => movimiento.tipo === "DEPOSITO"
+        ).length;
+
+        const enviadas = movimientos.filter(
+            (movimiento) =>
+                movimiento.tipo === "TRANSFERENCIA_ENVIADA"
+        ).length;
+
+        const recibidas = movimientos.filter(
+            (movimiento) =>
+                movimiento.tipo === "TRANSFERENCIA_RECIBIDA"
+        ).length;
+
+        return {
+            total: movimientos.length,
+            depositos,
+            enviadas,
+            recibidas
+        };
+    }
+
+    //vers9
+    // realizar depósito
+    realizarDeposito({
+        cuentaId,
         monto,
-        descripcion
-    });
+        descripcion = ""
+    }) {
+        const banco = this.obtenerInstanciaBanco();
 
-    // Guardar nuevos saldos y movimientos
-    this.guardarBanco();
+        const movimiento = banco.realizarDeposito({
+            cuentaId,
+            monto,
+            descripcion
+        });
 
-    return resultado;
-}
+        // Guardar saldo y movimiento
+        this.guardarBanco();
 
+        return movimiento;
+    }
 
+    // v9 - realiza transferencia
+    realizarTransferencia({
+        cuentaOrigenId,
+        numeroCuentaDestino,
+        monto,
+        descripcion = ""
+    }) {
+        const banco = this.obtenerInstanciaBanco();
+
+        // eliminar espacios del número de cuenta
+        const numeroDestino = String(numeroCuentaDestino)
+            .replace(/\s/g, "")
+            .trim();
+
+        // busca cuenta destino
+        const cuentaDestino = banco.buscarCuentaPorNumero(
+            numeroDestino
+        );
+
+        if (!cuentaDestino) {
+            throw new Error("La cuenta destino no existe.");
+        }
+
+        // realizamos transferencia
+        const resultado = banco.realizarTransferencia({
+            cuentaOrigenId,
+            cuentaDestinoId: cuentaDestino.id,
+            monto,
+            descripcion
+        });
+
+        // Guardar nuevos saldos y movimientos
+        this.guardarBanco();
+
+        return resultado;
+    }
 
     // Actualizar info personal vers8
     actualizarUsuario(usuarioId, { nombre, email, telefono }) {
