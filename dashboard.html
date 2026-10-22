@@ -2,38 +2,53 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard - Sistema Bancario</title>
+    <title>Dashboard | Sistema de Gestión Bancaria</title>
 
     <link rel="stylesheet" href="./css/styles.css">
 </head>
-<body class="dashboard-page">
+<body class="app-dashboard">
 
-    <!-- Pantalla principal del usuario -->
-    <main class="dashboard-simple">
+    <!-- Barra superior -->
+    <header class="topbar">
+        <div>
+            <h1>Banco Digital</h1>
+            <p>Sistema de Gestión Bancaria</p>
+        </div>
 
-        <h1>Dashboard</h1>
-
-        <!-- Mostrar nombre del usuario -->
-        <p id="nombreUsuario"></p>
-
-        <p>
-            La sesión se encuentra activa correctamente.
-        </p>
-
-        <!-- Cerrar sesión -->
         <button
             type="button"
             id="logoutBtn"
-            class="btn btn-primary"
-        >
+            class="btn btn-secondary">
             Cerrar sesión
         </button>
+    </header>
 
+    <!-- Navegación del sistema -->
+    <nav class="dashboard-nav">
+        <a href="dashboard.html" class="active">
+            Dashboard
+        </a>
+
+        <a href="cuenta.html">
+            Mi cuenta
+        </a>
+
+        <a href="movimientos.html">
+            Movimientos
+        </a>
+
+        <a href="transferencia.html">
+            Transferencias
+        </a>
+    </nav>
+
+    <!-- Contenido generado desde JavaScript -->
+    <main
+        class="dashboard-content"
+        id="dashboardRoot">
     </main>
 
     <!-- SweetAlert2 -->
@@ -42,8 +57,8 @@
     <!-- JavaScript del Dashboard -->
     <script
         type="module"
-        src="./js/ui/DashboardUI.js"
-    ></script>
+        src="./js/ui/DashboardUI.js">
+    </script>
 
 </body>
 </html>
