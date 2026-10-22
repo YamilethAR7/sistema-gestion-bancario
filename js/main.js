@@ -16,14 +16,18 @@ import {
     formatAccountNumber
 } from "./utils/formateador.js";
 
+//imports models
 import { Usuario } from "./models/Usuario.js";
 import { Cuenta } from "./models/Cuenta.js";
 import { Movimiento } from "./models/Movimiento.js";
-
+import{Banco } from"./models/Banco.js";
 
 //verificamos con console.log y comprobamos
-console.log("Sistema de Gestión Bancaria - v0.3.0");
-console.log("Campo obligatorio:", validarCampoObligatorio("Banco Digital"));
+console.log("Sistema de Gestión Bancaria - v0.4.0");
+
+console.log("Campo obligatorio:", validarCampoObligatorio("Banco Digital")
+);
+
 
 console.log("Monto válido:", validarMonto(1000));
 
@@ -35,6 +39,10 @@ console.log("Fecha formateada:", formatDate(new Date()));
 
 console.log("Número de cuenta:", formatAccountNumber("123456789012"));
 
+//crear banko
+const bancoDemo = new Banco();
+
+
 // Crear usuario de ejemplo
 const usuarioDemo = new Usuario({
     nombre: "yamileth Acevedo",
@@ -43,6 +51,14 @@ const usuarioDemo = new Usuario({
     password: "122347"
 });
 
+//registrar usuario en el banco
+bancoDemo.agregarUsuario(usuarioDemo);
+//comprobamos banco
+console.log(
+    "Usuarios registrados:",
+    bancoDemo.usuarios
+);
+
 console.log("Usuario:", usuarioDemo);
 // Crear cuenta bank
 const cuentaDemo = new Cuenta({
@@ -50,31 +66,68 @@ const cuentaDemo = new Cuenta({
     usuarioId: usuarioDemo.id
 });
 
-console.log("Cuenta:", cuentaDemo);
-// Realizar un depósito
-cuentaDemo.depositar(5000);
-
+//registro en cuenta banco
+bancoDemo.agregarCuenta(cuentaDemo);
 console.log(
-    "Saldo después del depósito:",
-    formatCurrency(cuentaDemo.saldo)
+    "Cuentas registradas:",
+    bancoDemo.cuentas
 );
-// Crear movimiento
-const movimientoDemo = new Movimiento({
-    tipo: "DEPOSITO",
+
+
+// Realizar deposito desde banco
+const depositoDemo = bancoDemo.realizarDeposito({
+    cuentaId: cuentaDemo.id,
     monto: 5000,
-    descripcion: "Depósito inicial",
-    cuentaOrigen: cuentaDemo.id,
-    saldoResultante: cuentaDemo.saldo
+    descripcion: "Depósito inicial"
 });
 
-console.log("Movimiento:", movimientoDemo);
-// Comprobar relaciones entre movimientos
+// Mostrar saldo
 console.log(
-    "Cuenta pertenece al usuario:",
-    usuarioDemo.id === cuentaDemo.usuarioId
+    "Saldo actual:",
+    formatCurrency(cuentaDemo.saldo)
+);
+
+// muestra movimiento generado
+console.log(
+    "Movimiento generado:",
+    depositoDemo
+);
+
+// muestra movimientos registrados
+console.log(
+    "Movimientos registrados:",
+    bancoDemo.movimientos
+);
+
+// Buscar usuario por id
+const usuarioEncontrado = bancoDemo.buscarUsuarioPorId(
+    usuarioDemo.id
 );
 
 console.log(
-    "Movimiento pertenece a la cuenta:",
-    cuentaDemo.id === movimientoDemo.cuentaOrigen
+    "El usuario ha sido encontrado:",
+    usuarioEncontrado
 );
+
+// Obtener cuentas del usuario
+const cuentasUsuario = bancoDemo.obtenerCuentasDeUsuario(
+    usuarioDemo.id
+);
+
+console.log(
+    "Cuentas del usuario:",
+    cuentasUsuario
+);
+
+// Probar un deposito invalido por comprobacion
+try {
+    bancoDemo.realizarDeposito({
+        cuentaId: cuentaDemo.id,
+        monto: -500
+    });
+} catch (error) {
+    console.log(
+        "Error :",
+        error.message
+    );
+}

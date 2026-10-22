@@ -1,3 +1,16 @@
-## Versión 3
-v0.3.0 - Modelado del dominio con Programación Orientada a Objetos.
-En esta versión se agregaron now las clases Usuario, Cuenta y Movimiento.
+
+## Versión actual v0.4.0 
+Modelo  del banco y reglas del dominio bancario lo que si y lo que no.
+
+## Funciones agregadas
+En esta versión se creó Banco.js en models dentro de js, para administrar
+usuarios, cuentas y movimientos.
+
+Se utilizaron los métodos agregarUsuario(),
+buscarUsuarioPorId(), agregarCuenta(),
+buscarCuentaPorId(), buscarCuentaPorNumero(),
+obtenerCuentasDeUsuario(), registrarMovimiento(),
+realizarDeposito() y obtenerMovimientosDeCuenta().
+
+También se agregaron validaciones para evitar
+cuentas duplicadas y depósitos con montos inválidos.
